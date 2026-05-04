@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String
+  hashedPassword String
+  role           String   @default("CLERK") // ADMIN or CLERK
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Donor {
+  id          String     @id @default(cuid())
+  firstName   String
+  lastName    String
+  dateOfBirth DateTime
+  gender      String
+  bloodType   String
+  rhFactor    String     // + or -
+  email       String?
+  phone       String
+  address     String
+  city        String
+  state       String
+  zipCode     String
+  status      String     @default("ACTIVE") // ACTIVE, INACTIVE, DEFERRED
+  lastDonation DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  donations   Donation[]
+}
+
+model Donation {
+  id              String   @id @default(cuid())
+  donorId         String
+  donor           Donor    @relation(fields: [donorId], references: [id])
+  donationDate    DateTime @default(now())
+  volumeMl        Int      @default(450)
+  bloodType       String
+  rhFactor        String
+  status          String   @default("COLLECTED") // COLLECTED, TESTED, APPROVED, REJECTED, EXPIRED
+  hemoglobinLevel Float?
+  notes           String?
+  collectedBy     String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model BloodInventory {
+  id             String   @id @default(cuid())
+  bloodType      String
+  rhFactor       String
+  unitsAvailable Int      @default(0)
+  minimumStock   Int      @default(5)
+  lastUpdated    DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([bloodType, rhFactor])
+}
+
+model BloodRequest {
+  id              String   @id @default(cuid())
+  patientName     String
+  patientAge      Int
+  bloodType       String
+  rhFactor        String
+  unitsRequested  Int
+  urgency         String   @default("NORMAL") // NORMAL, URGENT, EMERGENCY
+  hospitalName    String
+  doctorName      String
+  status          String   @default("PENDING") // PENDING, APPROVED, FULFILLED, REJECTED
+  notes           String?
+  requestedBy     String
+  processedBy     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
