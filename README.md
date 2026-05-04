@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BloodBank Management System
+
+A full-stack blood bank management system built with Next.js, featuring role-based access for administrators and clerks.
+
+## Features
+
+### Admin Features
+- **Dashboard**: Overview of blood inventory, recent donations, and pending requests
+- **User Management**: Create, view, and delete system users (admins and clerks)
+- **Full Access**: All clerk features plus administrative controls
+
+### Clerk Features
+- **Donor Management**: Register new donors, view donor profiles and donation history
+- **Donation Recording**: Record blood donations with donor selection and details
+- **Blood Inventory**: Monitor stock levels with low-stock alerts, edit inventory
+- **Blood Requests**: Create and process blood requests with urgency levels
+
+## Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Database**: SQLite with Prisma ORM
+- **Authentication**: NextAuth.js with JWT sessions
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+- Node.js 20+
+- npm
+
+### Installation
+
+```bash
+npm install
+```
+
+### Database Setup
+
+```bash
+npx prisma migrate dev
+npx tsx prisma/seed.ts
+```
+
+### Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Demo Credentials
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Role  | Email               | Password |
+|-------|---------------------|----------|
+| Admin | admin@bloodbank.com | admin123 |
+| Clerk | clerk@bloodbank.com | clerk123 |
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+├── app/
+│   ├── (auth)/login/        # Login page
+│   ├── (dashboard)/         # Protected dashboard pages
+│   │   ├── dashboard/       # Main dashboard
+│   │   ├── donors/          # Donor management
+│   │   ├── donations/       # Donation tracking
+│   │   ├── inventory/       # Blood inventory
+│   │   ├── requests/        # Blood requests
+│   │   └── users/           # User management (admin only)
+│   └── api/                 # API route handlers
+├── components/
+│   ├── shared/              # App-level components
+│   └── ui/                  # shadcn/ui components
+├── lib/                     # Utilities and database client
+└── types/                   # TypeScript type definitions
+```
