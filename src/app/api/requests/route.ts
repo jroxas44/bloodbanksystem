@@ -38,36 +38,51 @@ export async function POST(request: Request) {
   return NextResponse.json(bloodRequest, { status: 201 });
 }
 
+const VALID_REQUEST_STATUSES = ["PENDING", "APPROVED", "FULFILLED", "REJECTED"];
+
 export async function PATCH(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
 
+  if (!VALID_REQUEST_STATUSES.includes(body.status)) {
+    return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+  }
+
   if (body.status === "FULFILLED") {
-    const bloodRequest = await prisma.bloodRequest.findUnique({ where: { id: body.id } });
-    if (!bloodRequest) return NextResponse.json({ error: "Request not found" }, { status: 404 });
+    const result = await prisma.$transaction(async (tx) => {
+      const bloodRequest = await tx.bloodRequest.findUnique({ where: { id: body.id } });
+      if (!bloodRequest) throw new Error("NOT_FOUND");
 
-    const inventory = await prisma.bloodInventory.findUnique({
-      where: {
-        bloodType_rhFactor: {
-          bloodType: bloodRequest.bloodType,
-          rhFactor: bloodRequest.rhFactor,
+      const inventory = await tx.bloodInventory.findUnique({
+        where: {
+          bloodType_rhFactor: {
+            bloodType: bloodRequest.bloodType,
+            rhFactor: bloodRequest.rhFactor,
+          },
         },
-      },
+      });
+
+      if (!inventory || inventory.unitsAvailable < bloodRequest.unitsRequested) {
+        throw new Error("INSUFFICIENT");
+      }
+
+      await tx.bloodInventory.update({
+        where: { id: inventory.id },
+        data: {
+          unitsAvailable: { decrement: bloodRequest.unitsRequested },
+          lastUpdated: new Date(),
+        },
+      });
+
+      return tx.bloodRequest.update({
+        where: { id: body.id },
+        data: { status: body.status, processedBy: session.user.name },
+      });
     });
 
-    if (!inventory || inventory.unitsAvailable < bloodRequest.unitsRequested) {
-      return NextResponse.json({ error: "Insufficient blood units" }, { status: 400 });
-    }
-
-    await prisma.bloodInventory.update({
-      where: { id: inventory.id },
-      data: {
-        unitsAvailable: { decrement: bloodRequest.unitsRequested },
-        lastUpdated: new Date(),
-      },
-    });
+    return NextResponse.json(result);
   }
 
   const updated = await prisma.bloodRequest.update({

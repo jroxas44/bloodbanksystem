@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       donorId: body.donorId,
       bloodType: donor.bloodType,
       rhFactor: donor.rhFactor,
-      volumeMl: body.volumeMl || 450,
+      volumeMl: parseInt(body.volumeMl) || 450,
       hemoglobinLevel: body.hemoglobinLevel ? parseFloat(body.hemoglobinLevel) : null,
       notes: body.notes || null,
       collectedBy: session.user.name,
@@ -56,11 +56,32 @@ export async function POST(request: Request) {
   return NextResponse.json(donation, { status: 201 });
 }
 
+const VALID_STATUSES = ["COLLECTED", "TESTED", "APPROVED", "REJECTED", "EXPIRED"];
+const ALLOWED_TRANSITIONS: Record<string, string[]> = {
+  COLLECTED: ["TESTED", "REJECTED"],
+  TESTED: ["APPROVED", "REJECTED"],
+};
+
 export async function PATCH(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
+
+  if (!VALID_STATUSES.includes(body.status)) {
+    return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+  }
+
+  const donation = await prisma.donation.findUnique({ where: { id: body.id } });
+  if (!donation) return NextResponse.json({ error: "Donation not found" }, { status: 404 });
+
+  const allowed = ALLOWED_TRANSITIONS[donation.status];
+  if (allowed && !allowed.includes(body.status)) {
+    return NextResponse.json(
+      { error: `Cannot transition from ${donation.status} to ${body.status}` },
+      { status: 400 }
+    );
+  }
 
   const updated = await prisma.donation.update({
     where: { id: body.id },
