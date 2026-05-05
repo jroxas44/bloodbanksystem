@@ -1,10 +1,10 @@
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  output   = "../server/generated/prisma"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
 }
 
 model User {
@@ -12,30 +12,30 @@ model User {
   email          String   @unique
   name           String
   hashedPassword String
-  role           String   @default("CLERK") // ADMIN or CLERK
+  role           String   @default("CLERK")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
 
 model Donor {
-  id          String     @id @default(cuid())
-  firstName   String
-  lastName    String
-  dateOfBirth DateTime
-  gender      String
-  bloodType   String
-  rhFactor    String     // + or -
-  email       String?
-  phone       String
-  address     String
-  city        String
-  state       String
-  zipCode     String
-  status      String     @default("ACTIVE") // ACTIVE, INACTIVE, DEFERRED
+  id           String     @id @default(cuid())
+  firstName    String
+  lastName     String
+  dateOfBirth  DateTime
+  gender       String
+  bloodType    String
+  rhFactor     String
+  email        String?
+  phone        String
+  address      String
+  city         String
+  state        String
+  zipCode      String
+  status       String     @default("ACTIVE")
   lastDonation DateTime?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  donations   Donation[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  donations    Donation[]
 }
 
 model Donation {
@@ -46,12 +46,14 @@ model Donation {
   volumeMl        Int      @default(450)
   bloodType       String
   rhFactor        String
-  status          String   @default("COLLECTED") // COLLECTED, TESTED, APPROVED, REJECTED, EXPIRED
+  status          String   @default("COLLECTED")
   hemoglobinLevel Float?
-  notes           String?
+  notes           String?  @db.Text
   collectedBy     String
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@index([donorId])
 }
 
 model BloodInventory {
@@ -68,19 +70,19 @@ model BloodInventory {
 }
 
 model BloodRequest {
-  id              String   @id @default(cuid())
-  patientName     String
-  patientAge      Int
-  bloodType       String
-  rhFactor        String
-  unitsRequested  Int
-  urgency         String   @default("NORMAL") // NORMAL, URGENT, EMERGENCY
-  hospitalName    String
-  doctorName      String
-  status          String   @default("PENDING") // PENDING, APPROVED, FULFILLED, REJECTED
-  notes           String?
-  requestedBy     String
-  processedBy     String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(cuid())
+  patientName    String
+  patientAge     Int
+  bloodType      String
+  rhFactor       String
+  unitsRequested Int
+  urgency        String   @default("NORMAL")
+  hospitalName   String
+  doctorName     String
+  status         String   @default("PENDING")
+  notes          String?  @db.Text
+  requestedBy    String
+  processedBy    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

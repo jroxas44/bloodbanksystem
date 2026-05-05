@@ -1,0 +1,34 @@
+<script setup lang="ts">
+const { toasts } = useToast();
+</script>
+
+<template>
+  <div class="fixed bottom-4 right-4 z-50 space-y-2">
+    <TransitionGroup name="toast">
+      <div
+        v-for="toast in toasts"
+        :key="toast.id"
+        class="flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-sm text-white min-w-[280px]"
+        :class="{
+          'bg-green-600': toast.type === 'success',
+          'bg-red-600': toast.type === 'error',
+          'bg-blue-600': toast.type === 'info',
+        }"
+      >
+        <span>{{ toast.message }}</span>
+      </div>
+    </TransitionGroup>
+  </div>
+</template>
+
+<style scoped>
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s ease;
+}
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(100px);
+}
+</style>

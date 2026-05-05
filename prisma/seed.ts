@@ -1,10 +1,16 @@
-import { PrismaClient } from "../src/generated/prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaClient } from "../server/generated/prisma/client";
+import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import bcrypt from "bcryptjs";
-import path from "path";
 
-const dbPath = path.join(process.cwd(), "prisma", "dev.db");
-const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
+const url = process.env.DATABASE_URL || "mysql://root:bloodbank123@localhost:3306/bloodbank";
+const parsed = new URL(url);
+const adapter = new PrismaMariaDb({
+  host: parsed.hostname,
+  port: parseInt(parsed.port) || 3306,
+  user: parsed.username,
+  password: parsed.password,
+  database: parsed.pathname.slice(1),
+});
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
