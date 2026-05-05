@@ -33,9 +33,12 @@ A full-stack Blood Bank Management System built with **Nuxt.js 3**, **Vue.js 3**
 
 ## Setup
 
+> **First time?** See the full **[SETUP.md](SETUP.md)** guide with detailed step-by-step instructions and download links for all prerequisites.
+
 ### Prerequisites
-- Node.js 18+
-- MySQL 8.0 (or Docker)
+- [Node.js 18+](https://nodejs.org/en/download)
+- [MySQL 8.0](https://dev.mysql.com/downloads/mysql/) or [Docker](https://www.docker.com/products/docker-desktop/)
+- [Git](https://git-scm.com/downloads)
 
 ### Quick Start with Docker MySQL
 
