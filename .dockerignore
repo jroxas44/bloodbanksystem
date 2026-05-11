@@ -1,0 +1,47 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build outputs
+.nuxt
+.output
+dist
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+SETUP.md
+.md
+
+# Agent files
+.agent
+.agent-mem
+.brainsync
+.mcp.json
+.windsurfrules
+CLAUDE.md
+.cursorrules
+
+# Testing
+coverage
+.nyc_output

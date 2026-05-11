@@ -33,24 +33,53 @@ A full-stack Blood Bank Management System built with **Nuxt.js 3**, **Vue.js 3**
 
 ## Setup
 
-> **First time?** See the full **[SETUP.md](SETUP.md)** guide with detailed step-by-step instructions and download links for all prerequisites.
+### Quick Start with Docker (Recommended)
 
-### Prerequisites
-- [Node.js 18+](https://nodejs.org/en/download)
-- [MySQL 8.0](https://dev.mysql.com/downloads/mysql/) or [Docker](https://www.docker.com/products/docker-desktop/)
-- [Git](https://git-scm.com/downloads)
-
-### Quick Start with Docker MySQL
+The easiest way to run the entire stack (frontend, backend, and database) is using Docker Compose:
 
 ```bash
-# Start MySQL
-docker run -d --name bloodbank-mysql \
-  -e MYSQL_ROOT_PASSWORD=bloodbank123 \
-  -e MYSQL_DATABASE=bloodbank \
-  -p 3306:3306 mysql:8.0
+# Build and start all services (includes automatic database seeding)
+docker-compose up -d
 
+# The application will be available at http://localhost:3001
+# MySQL will be available at localhost:3307
+```
+
+To stop the services:
+
+```bash
+docker-compose down
+```
+
+To rebuild after making changes:
+
+```bash
+docker-compose up -d --build
+```
+
+### Alternative: Manual Setup (Without Docker)
+
+#### Prerequisites
+- [Node.js 20+](https://nodejs.org/en/download)
+- [MySQL 8.0](https://dev.mysql.com/downloads/mysql/) (local installation) OR [Docker](https://www.docker.com/products/docker-desktop/) (for MySQL only)
+- [Git](https://git-scm.com/downloads)
+
+#### Option A: Using Local MySQL Installation
+
+```bash
 # Install dependencies
 npm install
+
+# Create .env file
+cp .env.example .env
+
+# Update .env with your MySQL credentials
+# DATABASE_URL="mysql://root:YOUR_PASSWORD@localhost:3306/bloodbank"
+
+# Create database in MySQL
+mysql -u root -p
+CREATE DATABASE bloodbank;
+EXIT;
 
 # Run migrations
 npx prisma migrate dev --name init
@@ -62,9 +91,48 @@ npx tsx prisma/seed.ts
 npm run dev
 ```
 
+#### Option B: Using Docker for MySQL Only
+
+```bash
+# Start MySQL in Docker
+docker run -d --name bloodbank-mysql \
+  -e MYSQL_ROOT_PASSWORD=bloodbank123 \
+  -e MYSQL_DATABASE=bloodbank \
+  -p 3306:3306 mysql:8.0
+
+# Install dependencies
+npm install
+
+# Create .env file
+cp .env.example .env
+
+# Run migrations
+npx prisma migrate dev --name init
+
+# Seed database
+npx tsx prisma/seed.ts
+
+# Start dev server
+npm run dev
+```
+
+#### Quick Setup Script
+
+Run the setup script to automate the process:
+
+```bash
+# For local MySQL
+npm run setup:local
+
+# For Docker MySQL
+npm run setup:docker-mysql
+```
+
 ### Environment Variables
 
-Copy `.env.example` to `.env` and update:
+For Docker Compose, the environment variables are already set in `docker-compose.yml`. No additional `.env` file is needed.
+
+For manual setup, copy `.env.example` to `.env` and update:
 
 ```
 DATABASE_URL="mysql://root:bloodbank123@localhost:3306/bloodbank"

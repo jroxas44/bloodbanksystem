@@ -26,3 +26,6 @@ logs
 # VS Code
 .vscode
 server/generated/
+
+# Documentation
+SETUP.md

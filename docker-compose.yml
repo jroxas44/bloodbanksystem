@@ -1,0 +1,68 @@
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: bloodbank-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: bloodbank123
+      MYSQL_DATABASE: bloodbank
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pbloodbank123"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - bloodbank-network
+
+  # Nuxt.js Application (Frontend + Backend)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bloodbank-app
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      DATABASE_URL: mysql://root:bloodbank123@mysql:3306/bloodbank?allowPublicKeyRetrieval=true
+      JWT_SECRET: bloodbank-jwt-secret-change-in-production
+      NUXT_HOST: 0.0.0.0
+      NUXT_PORT: 3000
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - bloodbank-network
+
+  # Database Seeding Service
+  seeder:
+    image: mysql:8.0
+    container_name: bloodbank-seeder
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./prisma:/scripts
+    command: >
+      sh -c "
+        echo 'Waiting for MySQL to be fully ready...' &&
+        sleep 5 &&
+        mysql -hmysql -uroot -pbloodbank123 bloodbank < /scripts/migrations/20260505000312_init/migration.sql &&
+        mysql -hmysql -uroot -pbloodbank123 bloodbank < /scripts/seed.sql &&
+        mysql -hmysql -uroot -pbloodbank123 bloodbank < /scripts/update-passwords.sql &&
+        echo 'Database seeded successfully!'
+      "
+    networks:
+      - bloodbank-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  bloodbank-network:
+    driver: bridge
